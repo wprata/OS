@@ -17,6 +17,9 @@ int programStart; // use for scheduler
 int totalBlocks = 0; //used as a total block count
 int blockCount=1; //temp variable to use as a pointer starting at one
 
+
+
+
     public MyOperatingSystem(Hardware hw) //constructor 
     {
         this.hw=hw;
