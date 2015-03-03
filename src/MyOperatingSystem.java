@@ -13,12 +13,9 @@ int progLength [] = new int[Hardware.Disk.blockSize]; //used as a temp storage
 int progStart  [] = new int[Hardware.Disk.blockSize]; //used to store the start addres of each program
 Queue<Integer> sched = new LinkedList<Integer>(); // used as the schedule queue
 int currentProgram; // used for scheduler
-int programStart; // use for scheduler
+int programS; // use for scheduler
 int totalBlocks = 0; //used as a total block count
 int blockCount=1; //temp variable to use as a pointer starting at one
-
-
-
 
     public MyOperatingSystem(Hardware hw) //constructor 
     {
@@ -90,7 +87,7 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                 	} else {
                     	loadComplete = true; //sets load to true so it will not load again
                         this.startSched(); // add to scheduler
-                        programStart = this.getSchedRange(); // call scheduler range method
+                        programS = this.getSchedRange(); // call scheduler range method
                         currentProgram = this.getSchedNumber(); // call scheduler start number method
                         
 //System.out.println("Load complete, run prog " + currentProgram);
