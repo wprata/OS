@@ -54,20 +54,27 @@ int blockCount=1; //temp variable to use as a pointer starting at one
         } // end for   
     }//end method
 
-    // method to get program address from schedular
-    public int getSchedRange()
+    
+    
+    
+    
+    
+    // method to get address range of program
+    public int getAddr()
     {
-       int temp = this.sched.peek(); //adds the program number to temp without removing
-       int tempCount = this.progStart[temp]; // gets the start of that program
-       return tempCount;
+       int address = 0;
+       return address;
     }//end method
     
-    //method to return program number
-    public int getSchedNumber()
+    //method to store the program address range in the queue
+    public void storeAddr()
     {
-       int progNum = this.sched.remove();
-       return progNum;
+       
     }
+    
+    
+    
+    
     
     @Override
     public void interrupt(Hardware.Interrupt it) {      
@@ -87,8 +94,7 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                 	} else {
                     	loadComplete = true; //sets load to true so it will not load again
                         this.startSched(); // add to scheduler
-                        programS = this.getSchedRange(); // call scheduler range method
-                        currentProgram = this.getSchedNumber(); // call scheduler start number method
+
                         
 //System.out.println("Load complete, run prog " + currentProgram);
                         hw.store(Hardware.Address.baseRegister, Hardware.Address.userBase+32);//loads the running process start to the first run address
