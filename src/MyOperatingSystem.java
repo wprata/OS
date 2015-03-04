@@ -6,6 +6,9 @@
 import java.util.*;
 public class MyOperatingSystem implements OperatingSystem{
 
+    
+    
+    
 boolean loadComplete = false;
 Hardware hw;  //my hardware of type Hardware
 int progLength [] = new int[Hardware.Disk.blockSize]; //used as a temp storage
