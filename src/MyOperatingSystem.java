@@ -1,7 +1,7 @@
 /*
 * William Prata
 * Ashley Navin
-* V 2.19 
+* V 2.20 
 */
 import java.util.*;
 public class MyOperatingSystem implements OperatingSystem{
@@ -12,7 +12,6 @@ int progLength [] = new int[Hardware.Disk.blockSize]; //used as a temp storage
 int progStart  [] = new int[Hardware.Disk.blockSize]; //used to store the start addres of each program
 Queue<Integer> sched = new LinkedList<Integer>(); // used as the schedule queue
 int currentProgram; // used for scheduler
-int programS; // use for scheduler
 int totalBlocks = 0; //used as a total block count
 int blockCount=1; //temp variable to use as a pointer starting at one
 
@@ -59,17 +58,19 @@ int blockCount=1; //temp variable to use as a pointer starting at one
        int programNum = sched.remove();
        return programNum;
     }//end method
-    
-    //method to store the program address range in the queue
-    public void storeProgram()
+   
+    //method to traverse scheduler to find program number needed for exec system call
+ /*
+    public int getID(int x)
     {
-       
-    } 
-    
+        //int ID;
+        //return ID;
+    }
+*/
     @Override
     public void interrupt(Hardware.Interrupt it) {      
   	 MyOperatingSystem.this.fillTempIndex(); // populate the array of disk index with the first disk block
-        
+         this.startSched(); // add to scheduler
          if(it == Hardware.Interrupt.disk)    //Disk Interrupt Handler
         {
        	   	if(hw.fetch(Hardware.Address.userBase) != 0) //if the disk is not empty (something is in word 0 block 0 of primary storage)
@@ -83,12 +84,10 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                         hw.store(Hardware.Address.diskCommandRegister, Hardware.Disk.readCommand); // command to start reading the disk                                     
                 	} else {
                     	loadComplete = true; //sets load to true so it will not load again
-                        this.startSched(); // add to scheduler
-
-                        
+                        currentProgram = this.getProgram();  //get program number from the scheduler                   
 //System.out.println("Load complete, run prog " + currentProgram);
                         hw.store(Hardware.Address.baseRegister, Hardware.Address.userBase+32);//loads the running process start to the first run address
-                    	hw.store(Hardware.Address.topRegister, (Hardware.Address.userBase+32 + (this.progLength[0]*32))); //loads the running process end to the last run address
+                    	hw.store(Hardware.Address.topRegister, (Hardware.Address.userBase+32 + (this.progLength[currentProgram]*32))); //loads the running process end to the last run address
                         hw.store(Hardware.Address.PCRegister, Hardware.Address.userBase+32); // commands the start of the processing to the start of the program
                     }                   
               		 blockCount++; // increment the block count
@@ -110,7 +109,7 @@ int blockCount=1; //temp variable to use as a pointer starting at one
         }else if(it == Hardware.Interrupt.reboot)  //on startup
         { 
 //System.out.println("reboot");
-            //runs the idle process   
+            //runs the idle process 
             hw.store(Hardware.Address.baseRegister, Hardware.Address.idleStart);//loads the running process start to the first run address
             hw.store(Hardware.Address.topRegister, Hardware.Address.idleEnd); //loads the running process end to the last run address
             hw.store(Hardware.Address.PCRegister, Hardware.Address.idleStart); // commands the start of the processing to the start of the program
@@ -130,6 +129,7 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                             break;
                     case OperatingSystem.SystemCall.exec: //execute system call
                             int programId = hw.fetch(Hardware.Address.systemBase+1);//id of the program being called
+                            currentProgram = sched.remove();
                             if(programId > 32) { //make sure it is a legal addressable program id
                                     this.interrupt(Hardware.Interrupt.invalidAddress); //only 32 programs max possible on a disk
                             } else { //program Id is legal
