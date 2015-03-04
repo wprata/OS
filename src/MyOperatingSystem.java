@@ -5,9 +5,6 @@
 */
 import java.util.*;
 public class MyOperatingSystem implements OperatingSystem{
-
-    
-    
     
 boolean loadComplete = false;
 Hardware hw;  //my hardware of type Hardware
@@ -56,27 +53,18 @@ int blockCount=1; //temp variable to use as a pointer starting at one
         } // end for   
     }//end method
 
-    
-    
-    
-    
-    
-    // method to get address range of program
-    public int getAddr()
+    // method to get program number
+    public int getProgram()
     {
-       int address = 0;
-       return address;
+       int programNum = sched.remove();
+       return programNum;
     }//end method
     
     //method to store the program address range in the queue
-    public void storeAddr()
+    public void storeProgram()
     {
        
-    }
-    
-    
-    
-    
+    } 
     
     @Override
     public void interrupt(Hardware.Interrupt it) {      
