@@ -158,13 +158,12 @@ int blockCount=1; //temp variable to use as a pointer starting at one
 //System.out.println("put");
                             break;
                     case OperatingSystem.SystemCall.getSlot:  //get slot system call
-                            int getslot = hw.fetch(Hardware.Address.systemBase); //get slot information
-                            status = hw.fetch(Hardware.Address.systemBase); // get status infromation
-                            if(status == Hardware.Status.ok) {  //if the status returned is ok
-                                int slotValue = hw.fetch(Hardware.Address.systemBase+1); //get the slot data
-                                int senderId = hw.fetch(Hardware.Address.systemBase+2); //get the location data
-//System.out.println("get:" + slotValue + " " + senderId);
-                            }
+                        int getslotValue = hw.fetch(Hardware.Address.systemBase+1); //get slot information
+                        int getSenderID = hw.fetch(Hardware.Address.systemBase+2);
+                        hw.store(Hardware.Address.systemBase, Hardware.Status.ok); // set status infromation
+                                              
+//System.out.println("get:" + getslotValue + " " + getSenderID);
+                            
                             break;        			
         	}//end switch            
         }//end if else    
