@@ -1,7 +1,7 @@
 /*
 * William Prata
 * Ashley Navin
-* V 2.20 
+* V 3.1 
 */
 import java.util.*;
 public class MyOperatingSystem implements OperatingSystem{
