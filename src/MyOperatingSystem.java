@@ -73,19 +73,20 @@ int blockCount=1; //temp variable to use as a pointer starting at one
          this.startSched(); // add to scheduler
          if(it == Hardware.Interrupt.disk)    //Disk Interrupt Handler
         {
+           
        	   	if(hw.fetch(Hardware.Address.userBase) != 0) //if the disk is not empty (something is in word 0 block 0 of primary storage)
             {
             	if(loadComplete == false) {  //check the boolean to see if load has been completed
                 	if(blockCount <= totalBlocks) { //check the temp index and use as a loop to load blocks to primary storage
                 		
-//System.out.println("loading:" + blockCount + " of total:" + totalBlocks);
+System.out.println("loading:" + blockCount + " of total:" + totalBlocks);
                         hw.store(Hardware.Address.diskBlockRegister, blockCount); // sets the first thing to be read disk block 0
                         hw.store(Hardware.Address.diskAddressRegister, Hardware.Address.userBase + (Hardware.Disk.blockSize*blockCount)); //set the disk address to start at the userbase
                         hw.store(Hardware.Address.diskCommandRegister, Hardware.Disk.readCommand); // command to start reading the disk                                     
                 	} else {
                     	loadComplete = true; //sets load to true so it will not load again
                         currentProgram = this.getProgram();  //get program number from the scheduler                   
-//System.out.println("Load complete, run prog " + currentProgram);
+System.out.println("Load complete, run prog " + currentProgram);
                         hw.store(Hardware.Address.baseRegister, Hardware.Address.userBase+32);//loads the running process start to the first run address
                     	hw.store(Hardware.Address.topRegister, (Hardware.Address.userBase+32 + (this.progLength[currentProgram]*32))); //loads the running process end to the last run address
                         hw.store(Hardware.Address.PCRegister, Hardware.Address.userBase+32); // commands the start of the processing to the start of the program
@@ -97,18 +98,18 @@ int blockCount=1; //temp variable to use as a pointer starting at one
             }
         }else if(it == Hardware.Interrupt.countdown) //countdown interrupt
         {
-//System.out.println("countdown");
+System.out.println("countdown");
         }else if(it == Hardware.Interrupt.illegalInstruction) //illegal instruction interrupt
         {
              hw.store(Hardware.Address.haltRegister, 1);// halts the system if there is an illegal instruction requested
-//System.out.println("illegalInstruction");
+System.out.println("illegalInstruction");
         }else if(it == Hardware.Interrupt.invalidAddress) //invalid address interrupt
         {
              hw.store(Hardware.Address.haltRegister, 1); //halts the system if there is an invalid Address request
-//System.out.println("invalidAddress");
+System.out.println("invalidAddress");
         }else if(it == Hardware.Interrupt.reboot)  //on startup
         { 
-//System.out.println("reboot");
+System.out.println("reboot");
             //runs the idle process 
             hw.store(Hardware.Address.baseRegister, Hardware.Address.idleStart);//loads the running process start to the first run address
             hw.store(Hardware.Address.topRegister, Hardware.Address.idleEnd); //loads the running process end to the last run address
@@ -125,9 +126,11 @@ int blockCount=1; //temp variable to use as a pointer starting at one
             //switch statement to handle different types of systemcalls
             switch(systemId) {
                     case OperatingSystem.SystemCall.exit: //exit system call 
+System.out.println("Exit");
                             hw.store(Hardware.Address.haltRegister, 1); //halt when a systemCall is called
                             break;
                     case OperatingSystem.SystemCall.exec: //execute system call
+                        
                             int programId = hw.fetch(Hardware.Address.systemBase+1);//id of the program being called
                             currentProgram = sched.remove();
                             if(programId > 32) { //make sure it is a legal addressable program id
@@ -136,14 +139,14 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                                 int programStart = progStart[programId]; // set the programStart to the first address of the id program from the progStart array
                                 int programEnd = programStart + (32 * this.progLength[programId]); //get programEnd based on the progStart array
 
-//System.out.println("Exec:" + programId + " " + programStart +" " + programEnd);
+System.out.println("Exec:" + programId + " " + programStart +" " + programEnd);
                                 hw.store(Hardware.Address.baseRegister, programStart);//loads the running process start to the first run address
                                 hw.store(Hardware.Address.topRegister, programEnd); //loads the running process end to the last run address
                                 hw.store(Hardware.Address.PCRegister, programStart); // commands the start of the processing to the start of the program
 
                                 status = hw.fetch(Hardware.Address.systemBase); // get the status to the status address
                                 int rtnProgramId = hw.fetch(Hardware.Address.systemBase+1); //return the new program id
-//System.out.println("Return:" + status + " ProgId:" + rtnProgramId);
+System.out.println("Return:" + status + " ProgId:" + rtnProgramId);
                             if(status != Hardware.Status.ok) {
                             }
                                 }
@@ -155,16 +158,20 @@ int blockCount=1; //temp variable to use as a pointer starting at one
                             int putslot = hw.fetch(Hardware.Address.systemBase+1); // get the slot information from the first program
                             int data = hw.fetch(Hardware.Address.systemBase+2); //put the infromation 
                             hw.store(Hardware.Address.systemBase, Hardware.Status.ok); //hardware status will be ok
-//System.out.println("put");
+System.out.println("put");
                             break;
                     case OperatingSystem.SystemCall.getSlot:  //get slot system call
                         int getslotValue = hw.fetch(Hardware.Address.systemBase+1); //get slot information
                         int getSenderID = hw.fetch(Hardware.Address.systemBase+2);
                         hw.store(Hardware.Address.systemBase, Hardware.Status.ok); // set status infromation
                                               
-//System.out.println("get:" + getslotValue + " " + getSenderID);
+System.out.println("get:" + getslotValue + " " + getSenderID);
                             
-                            break;        			
+                            break; 
+                    case OperatingSystem.SystemCall.csin: //put a process in a critical section
+                        break;
+                    case OperatingSystem.SystemCall.csout:  //to exit the critical section 
+                        break;
         	}//end switch            
         }//end if else    
     } // end method    
