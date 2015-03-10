@@ -1,12 +1,13 @@
 /*
 * William Prata
 * Ashley Navin
-* V 3.1 
+* V 3.2 
 */
 import java.util.*;
 public class MyOperatingSystem implements OperatingSystem{
     
 boolean loadComplete = false;
+boolean csEmpty = true;  // for the critical sections 
 Hardware hw;  //my hardware of type Hardware
 int progLength [] = new int[Hardware.Disk.blockSize]; //used as a temp storage
 int progStart  [] = new int[Hardware.Disk.blockSize]; //used to store the start addres of each program
@@ -101,12 +102,14 @@ System.out.println("Load complete, run prog " + currentProgram);
 System.out.println("countdown");
         }else if(it == Hardware.Interrupt.illegalInstruction) //illegal instruction interrupt
         {
-             hw.store(Hardware.Address.haltRegister, 1);// halts the system if there is an illegal instruction requested
 System.out.println("illegalInstruction");
+             hw.store(Hardware.Address.haltRegister, 1);// halts the system if there is an illegal instruction requested
+
         }else if(it == Hardware.Interrupt.invalidAddress) //invalid address interrupt
         {
+System.out.println("invalidAddress");           
              hw.store(Hardware.Address.haltRegister, 1); //halts the system if there is an invalid Address request
-System.out.println("invalidAddress");
+
         }else if(it == Hardware.Interrupt.reboot)  //on startup
         { 
 System.out.println("reboot");
@@ -135,6 +138,7 @@ System.out.println("Exit");
                             currentProgram = sched.remove();
                             if(programId > 32) { //make sure it is a legal addressable program id
                                     this.interrupt(Hardware.Interrupt.invalidAddress); //only 32 programs max possible on a disk
+                                    hw.store(Hardware.Address.systemBase, Hardware.Status.badPid); // bad program id
                             } else { //program Id is legal
                                 int programStart = progStart[programId]; // set the programStart to the first address of the id program from the progStart array
                                 int programEnd = programStart + (32 * this.progLength[programId]); //get programEnd based on the progStart array
@@ -155,22 +159,35 @@ System.out.println("Return:" + status + " ProgId:" + rtnProgramId);
                             hw.store(Hardware.Address.systemBase, Hardware.Status.ok);  //hardware status is ok  	
                             break;
                     case OperatingSystem.SystemCall.putSlot: //put slot system call
-                            int putslot = hw.fetch(Hardware.Address.systemBase+1); // get the slot information from the first program
-                            int data = hw.fetch(Hardware.Address.systemBase+2); //put the infromation 
-                            hw.store(Hardware.Address.systemBase, Hardware.Status.ok); //hardware status will be ok
+                            boolean slotEmpty = true; // the slot is empty
+                            if(slotEmpty) // if the slot is empty
+                            {
+                                int putslot = hw.fetch(Hardware.Address.systemBase+1); // get the slot information from the first program
+                                int data = hw.fetch(Hardware.Address.systemBase+2); //put the infromation 
+                                slotEmpty = false; // slot is full
+                            }else{
+                              hw.store(Hardware.Address.systemBase, Hardware.Status.ok); //hardware status will be ok
+                            }
 System.out.println("put");
                             break;
                     case OperatingSystem.SystemCall.getSlot:  //get slot system call
                         int getslotValue = hw.fetch(Hardware.Address.systemBase+1); //get slot information
                         int getSenderID = hw.fetch(Hardware.Address.systemBase+2);
-                        hw.store(Hardware.Address.systemBase, Hardware.Status.ok); // set status infromation
-                                              
+                        if(getslotValue == 0)
+                        {
+                            hw.store(Hardware.Address.systemBase, Hardware.Status.noResource); //nothing in the slot to get
+                        }else{
+                            hw.store(Hardware.Address.systemBase, Hardware.Status.ok); // set status infromation to ok
+                        }
+                                                                           
 System.out.println("get:" + getslotValue + " " + getSenderID);
                             
                             break; 
                     case OperatingSystem.SystemCall.csin: //put a process in a critical section
+System.out.println("csin");
                         break;
                     case OperatingSystem.SystemCall.csout:  //to exit the critical section 
+System.out.println("csout");
                         break;
         	}//end switch            
         }//end if else    
